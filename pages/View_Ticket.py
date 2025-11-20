@@ -352,7 +352,6 @@ else:
 # -------------------------------------------------
 st.divider()
 if is_admin:
-    st.error("⚠ Admin only: delete this ticket. This cannot be undone.")
     col_del1, col_del2 = st.columns([1, 3])
     with col_del1:
         if st.button("🗑️ Delete ticket", use_container_width=True):
