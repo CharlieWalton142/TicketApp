@@ -1,21 +1,17 @@
 import streamlit as st
 from db import init_db
 from auth import verify_user
+from sidebar import is_logged_in, hide_other_pages_on_login
 
 st.set_page_config(page_title="Sign in", page_icon="🔐", layout="centered")
 init_db()
 
-if st.session_state.get("user"):
+# If already logged in, do NOT show login page; send to Home
+if is_logged_in():
     st.switch_page("Home.py")
-else:
-    st.markdown(""" 
-        <style>
-            /* hide any sidebar link whose label is 'Tickets' */
-            [data-testid="stSidebarNav"] li a[href*="Tickets"] 
-            {
-                display: none !important;
-            }
-        </style> """, unsafe_allow_html=True)  
+
+# Hide other pages in sidebar while on login
+hide_other_pages_on_login()
 
 st.title("🔐 Sign in to TicketApp")
 
