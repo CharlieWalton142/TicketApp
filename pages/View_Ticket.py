@@ -1,4 +1,3 @@
-# pages/View_Ticket.py
 import streamlit as st
 from db import (
     init_db,
@@ -14,7 +13,7 @@ from sidebar import (
     hide_login_link_if_logged_in,
     hide_admin_page_for_non_admin,
     get_current_user,
-    is_admin,
+    is_admin,  # imported but we shadow it with a bool below (kept for compatibility)
 )
 
 # -------------------------------------------------
@@ -48,10 +47,9 @@ hide_login_link_if_logged_in()
 hide_admin_page_for_non_admin()
 
 user = get_current_user()
-
 username = user["username"]
 role = (user.get("role") or "").strip().lower()
-is_admin = role == "admin"
+is_admin = role == "admin"  # boolean flag for convenience
 
 # Hide Login in sidebar
 st.markdown(
@@ -135,7 +133,7 @@ with top_c3:
 st.divider()
 
 # -------------------------------------------------
-# Status update
+# Status update (view-only or standalone change)
 # -------------------------------------------------
 current_status = t["status"] or "New"
 try:
@@ -143,30 +141,32 @@ try:
 except ValueError:
     status_idx = 0
 
-cs1, cs2 = st.columns([1, 3])
-with cs1:
-    if can_edit:
-        new_status = st.selectbox(
-            "Status",
-            STATUS_CHOICES,
-            index=status_idx,
-            key=f"detail_status_{tid}",
-        )
-    else:
-        st.markdown("**Status**")
-        st.write(current_status)
-        new_status = current_status
+# When NOT editing, show the separate Status row (as before)
+if not (st.session_state.edit_mode and can_edit):
+    cs1, cs2 = st.columns([1, 3])
+    with cs1:
+        if can_edit:
+            new_status = st.selectbox(
+                "Status",
+                STATUS_CHOICES,
+                index=status_idx,
+                key=f"detail_status_{tid}",
+            )
+        else:
+            st.markdown("**Status**")
+            st.write(current_status)
+            new_status = current_status
 
-with cs2:
-    if can_edit:
-        if st.button("💾 Save Status"):
-            update_ticket_status(tid, new_status)
-            st.success("Status updated.")
-            st.rerun()
-    else:
-        st.caption("Only the creator, assignee, or an admin can change the status.")
+    with cs2:
+        if can_edit:
+            if st.button("💾 Save Status"):
+                update_ticket_status(tid, new_status)
+                st.success("Status updated.")
+                st.rerun()
+        else:
+            st.caption("Only the creator, assignee, or an admin can change the status.")
 
-st.divider()
+    st.divider()
 
 # -------------------------------------------------
 # EDIT MODE: full form to update ticket
@@ -187,7 +187,37 @@ if st.session_state.edit_mode and can_edit:
         current_assignee_index = 0
 
     with st.form("edit_ticket", clear_on_submit=False):
-        # Ticket type
+
+        # ---- Top row: Status + Assignee + Parent ----
+        hdr1, hdr2, hdr3 = st.columns([1, 1, 1])
+
+        with hdr1:
+            et_status = st.selectbox(
+                "Status",
+                STATUS_CHOICES,
+                index=status_idx,
+            )
+
+        with hdr2:
+            et_assigned_to = st.selectbox(
+                "Assign to user (optional)",
+                user_names,
+                index=current_assignee_index,
+            )
+
+        with hdr3:
+            et_parent = st.text_input(
+                "Parent ticket ID (optional)",
+                value=str(t["parent_id"] or ""),
+            )
+
+        # Turn selected assignee/parent into IDs
+        et_user_id = user_ids[user_names.index(et_assigned_to)]
+        et_parent_id = int(et_parent) if et_parent.strip().isdigit() else None
+
+        st.markdown("---")
+
+        # ---- Ticket type + body fields ----
         et_ticket_type = st.selectbox(
             "Ticket type",
             TICKET_TYPES,
@@ -197,7 +227,7 @@ if st.session_state.edit_mode and can_edit:
         et_subject = st.text_input("Subject", value=t["subject"] or "")
 
         if et_ticket_type == "Test Case":
-            # Test Case: only need these four; summary/outcome not needed
+            # Test Case: only these fields; summary & outcome not used
             et_prereq = st.text_area(
                 "Preconditions / Requirements",
                 value=t["prerequisites"] or "",
@@ -213,11 +243,10 @@ if st.session_state.edit_mode and can_edit:
                 value=t["expected_outcome"] or "",
                 height=100,
             )
-            # summary/outcome fields are not shown for Test Case
             et_summary = None
             et_outcome = None
         else:
-            # Bug: original fields
+            # Bug ticket
             et_summary = st.text_input(
                 "Summary",
                 value=t["summary"] or "",
@@ -243,24 +272,15 @@ if st.session_state.edit_mode and can_edit:
                 height=100,
             )
 
-        et_assigned_to = st.selectbox(
-            "Assign to user (optional)",
-            user_names,
-            index=current_assignee_index,
-        )
-        et_user_id = user_ids[user_names.index(et_assigned_to)]
-
-        et_parent = st.text_input(
-            "Parent ticket ID (optional)",
-            value=str(t["parent_id"] or ""),
-        )
-        et_parent_id = int(et_parent) if et_parent.strip().isdigit() else None
-
         save_col, cancel_col = st.columns([1, 1])
         with save_col:
-            save_changes = st.form_submit_button("✅ Save changes", use_container_width=True)
+            save_changes = st.form_submit_button(
+                "✅ Save changes", use_container_width=True
+            )
         with cancel_col:
-            cancel_edit = st.form_submit_button("❌ Cancel edit", use_container_width=True)
+            cancel_edit = st.form_submit_button(
+                "❌ Cancel edit", use_container_width=True
+            )
 
     if cancel_edit:
         st.session_state.edit_mode = False
@@ -282,7 +302,7 @@ if st.session_state.edit_mode and can_edit:
             for e in errors:
                 st.error(e)
         else:
-            # For Test Case tickets, summary & outcome are not needed → store as ""
+            # For Test Case: summary & outcome stored as empty strings
             if et_ticket_type == "Test Case":
                 summary_val = ""
                 outcome_val = ""
@@ -299,8 +319,8 @@ if st.session_state.edit_mode and can_edit:
                 steps_to_replicate=(et_steps or "").strip(),
                 outcome=outcome_val,
                 expected_outcome=(et_expected or "").strip(),
-                status=new_status,  # keep current status selection
-                user_id=et_user_id,
+                status=et_status,      # status from header row
+                user_id=et_user_id,    # assignee from header row
                 parent_id=et_parent_id,
             )
             st.success("Ticket updated successfully.")
