@@ -1,6 +1,14 @@
 import streamlit as st
 from datetime import datetime, timedelta
 
+from sidebar import (
+    require_login,
+    hide_login_link_if_logged_in,
+    hide_admin_page_for_non_admin,
+    get_current_user,
+)
+
+
 from db import (
     init_db,
     list_tickets,
@@ -15,24 +23,22 @@ init_db()
 # -------------------------------------------------
 # Auth gate
 # -------------------------------------------------
-user = st.session_state.get("user")
 
-if not user:
-    # Not signed in → go to Login
-    st.switch_page("pages/Login.py")
+# Require login
+require_login()
 
-# Hide Login page link in sidebar when logged in
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebarNav"] li a[href*="Login"] {
-        display: none !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# Tidy sidebar
+hide_login_link_if_logged_in()
+hide_admin_page_for_non_admin()
 
+user = get_current_user()
+
+with st.sidebar:
+    st.success("Use the sidebar to switch pages.")
+    if user:
+        if st.button("Logout", use_container_width=True):
+            st.session_state.user = None
+            st.rerun()
 username = user["username"]
 
 # -------------------------------------------------
@@ -151,14 +157,3 @@ with right:
                     st.switch_page("pages/View_Ticket.py")
 
             st.markdown("<hr style='margin: 0.4rem 0;'>", unsafe_allow_html=True)
-
-# Sidebar: basic navigation + logout
-with st.sidebar:
-    st.success(f"Signed in as {username}")
-    st.page_link("Home.py", label="Home", icon="🏠")
-    st.page_link("pages/Tickets.py", label="Tickets", icon="📋")
-
-    st.markdown("---")
-    if st.button("Logout", use_container_width=True):
-        st.session_state.user = None
-        st.rerun()
