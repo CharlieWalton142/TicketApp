@@ -47,7 +47,7 @@ def create_user(username: str, password: str, role: str = "user") -> bool:
                 INSERT INTO users (username, password_hash, role, created_at)
                 VALUES (?, ?, ?, ?)
                 """,
-                (username, pw_hash, role, datetime.datetime().isoformat()),
+                (username, pw_hash, role, datetime.datetime.utcnow().isoformat()),
             )
             con.commit()
             print(f"✅ Created user: {username} ({role})")
@@ -67,6 +67,12 @@ def authenticate_user(username: str, password: str):
         return None
 
 
+def list_users():
+    """Return a list of all users (id + username)."""
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute("SELECT id, username FROM users ORDER BY username ASC")
+        return cur.fetchall()
+    
 def list_users_full():
     """Return all user details for admin view."""
     with _connect() as con, closing(con.cursor()) as cur:
