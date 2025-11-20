@@ -9,6 +9,14 @@ from db import (
     list_users,
 )
 
+from sidebar import (
+    require_login,
+    hide_login_link_if_logged_in,
+    hide_admin_page_for_non_admin,
+    get_current_user,
+    is_admin,
+)
+
 # -------------------------------------------------
 # Config / constants
 # -------------------------------------------------
@@ -35,9 +43,11 @@ init_db()
 # -------------------------------------------------
 # Auth + role helpers
 # -------------------------------------------------
-user = st.session_state.get("user")
-if not user:
-    st.switch_page("pages/Login.py")
+require_login()
+hide_login_link_if_logged_in()
+hide_admin_page_for_non_admin()
+
+user = get_current_user()
 
 username = user["username"]
 role = (user.get("role") or "").strip().lower()

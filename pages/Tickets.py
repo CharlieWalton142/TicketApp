@@ -9,6 +9,8 @@ from db import (
     update_ticket_status,
 )
 
+from sidebar import require_login, hide_login_link_if_logged_in, hide_admin_page_for_non_admin, get_current_user
+
 # ---- Status options (for browsing/updating only) ----
 STATUS_CHOICES = [
     "New",
@@ -34,6 +36,13 @@ TICKET_TYPES = [
 st.set_page_config(page_title="Tickets", page_icon="📋", layout="wide")
 init_db()
 
+# Auth and SAidebar clean up
+require_login()
+hide_login_link_if_logged_in()
+hide_admin_page_for_non_admin()
+
+current_user = get_current_user()
+
 # UI state
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
@@ -52,8 +61,9 @@ else:
     )
 
 # -------------------------------------------------
-# Sidebar
+# Sidebar 
 # -------------------------------------------------
+
 if not st.session_state.show_form:
     with st.sidebar:
         st.subheader("Filters")

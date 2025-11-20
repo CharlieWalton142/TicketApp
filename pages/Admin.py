@@ -7,6 +7,7 @@ from db import (
     update_user_role,
     delete_user,
 )
+from sidebar import require_admin, hide_login_link_if_logged_in, get_current_user
 
 st.set_page_config(page_title="User Administration", page_icon="🛠️", layout="wide")
 init_db()
@@ -18,23 +19,8 @@ current_user = st.session_state.get("user")
 if not current_user:
     st.switch_page("pages/Login.py")
 
-current_role = (current_user.get("role") or "").strip().lower()
-is_admin = current_role == "admin"
-
-if not is_admin:
-    st.error("You do not have permission to view this page.")
-    st.page_link("Home.py", label="⬅ Back to Home")
-    st.stop()
-
-# Hide Login link in sidebar
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebarNav"] li a[href*="Login"] { display: none !important; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+require_admin()
+hide_login_link_if_logged_in()
 
 st.title("🛠️ User Administration")
 st.caption(f"Signed in as {current_user['username']} (admin)")
