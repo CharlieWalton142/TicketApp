@@ -13,7 +13,7 @@ from sidebar import (
     hide_login_link_if_logged_in,
     hide_admin_page_for_non_admin,
     get_current_user,
-    is_admin,  # imported but we shadow it with a bool below (kept for compatibility)
+    is_admin,  # imported but then shadowed by a bool below
 )
 
 # -------------------------------------------------
@@ -49,7 +49,7 @@ hide_admin_page_for_non_admin()
 user = get_current_user()
 username = user["username"]
 role = (user.get("role") or "").strip().lower()
-is_admin = role == "admin"  # boolean flag for convenience
+is_admin = role == "admin"  # boolean convenience flag
 
 # Hide Login in sidebar
 st.markdown(
@@ -174,6 +174,29 @@ if not (st.session_state.edit_mode and can_edit):
 if st.session_state.edit_mode and can_edit:
     st.subheader("Edit ticket")
 
+    # highlight only mandatory fields when empty (for Bug; still fine for Test Case)
+    st.markdown(
+        """
+        <style>
+        [data-testid="stTextInput"] input[aria-label="Subject"]:placeholder-shown,
+        [data-testid="stTextInput"] input[aria-label="Summary"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Prerequisites"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Steps to replicate"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Outcome"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Expected Outcome"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Preconditions / Requirements"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Test Steps"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Pass Criteria"]:placeholder-shown {
+            border: 2px solid #FFD700 !important;
+            border-radius: 8px !important;
+            background-color: rgba(255, 215, 0, 0.03) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
     # Users for assignee dropdown
     users = list_users()
     user_names = ["— Unassigned —"] + [u["username"] for u in users]
@@ -185,6 +208,19 @@ if st.session_state.edit_mode and can_edit:
         current_assignee_index = user_ids.index(current_assignee_id)
     else:
         current_assignee_index = 0
+
+    # ---- Ticket type selector OUTSIDE the form so layout switches immediately ----
+    if "edit_ticket_type" not in st.session_state:
+        st.session_state.edit_ticket_type = ticket_type
+
+    et_ticket_type = st.selectbox(
+        "Ticket type",
+        TICKET_TYPES,
+        index=TICKET_TYPES.index(st.session_state.edit_ticket_type)
+        if st.session_state.edit_ticket_type in TICKET_TYPES
+        else 0,
+        key="edit_ticket_type",
+    )
 
     with st.form("edit_ticket", clear_on_submit=False):
 
@@ -217,12 +253,8 @@ if st.session_state.edit_mode and can_edit:
 
         st.markdown("---")
 
-        # ---- Ticket type + body fields ----
-        et_ticket_type = st.selectbox(
-            "Ticket type",
-            TICKET_TYPES,
-            index=TICKET_TYPES.index(ticket_type) if ticket_type in TICKET_TYPES else 0,
-        )
+        # ---- Use ticket type selected outside the form ----
+        et_ticket_type = st.session_state.edit_ticket_type
 
         et_subject = st.text_input("Subject", value=t["subject"] or "")
 

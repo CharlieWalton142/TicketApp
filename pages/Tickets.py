@@ -149,7 +149,10 @@ else:
         [data-testid="stTextArea"] textarea[aria-label="Prerequisites"]:placeholder-shown,
         [data-testid="stTextArea"] textarea[aria-label="Steps to replicate"]:placeholder-shown,
         [data-testid="stTextArea"] textarea[aria-label="Outcome"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Expected Outcome"]:placeholder-shown {
+        [data-testid="stTextArea"] textarea[aria-label="Expected Outcome"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Preconditions / Requirements"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Test Steps"]:placeholder-shown,
+        [data-testid="stTextArea"] textarea[aria-label="Pass Criteria"]:placeholder-shown {
             border: 2px solid #FFD700 !important;
             border-radius: 8px !important;
             background-color: rgba(255, 215, 0, 0.03) !important;
