@@ -37,8 +37,8 @@ def init_user_db():
         con.commit()
 
 
-def create_user(username: str, password: str, role: str = "user"):
-    """Create a new user with a hashed password."""
+def create_user(username: str, password: str, role: str = "user") -> bool:
+    """Create a new user with a hashed password. Returns True on success, False if username exists."""
     pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     with _connect() as con, closing(con.cursor()) as cur:
         try:
@@ -46,13 +46,15 @@ def create_user(username: str, password: str, role: str = "user"):
                 """
                 INSERT INTO users (username, password_hash, role, created_at)
                 VALUES (?, ?, ?, ?)
-            """,
-                (username, pw_hash, role, datetime.datetime.utcnow().isoformat()),
+                """,
+                (username, pw_hash, role, datetime.datetime().isoformat()),
             )
             con.commit()
             print(f"✅ Created user: {username} ({role})")
+            return True
         except sqlite3.IntegrityError:
             print(f"⚠️ Username '{username}' already exists.")
+            return False
 
 
 def authenticate_user(username: str, password: str):
