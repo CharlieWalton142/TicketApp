@@ -67,11 +67,32 @@ def authenticate_user(username: str, password: str):
         return None
 
 
-def list_users():
-    """Return a list of all users (id + username)."""
+def list_users_full():
+    """Return all user details for admin view."""
     with _connect() as con, closing(con.cursor()) as cur:
-        cur.execute("SELECT id, username FROM users ORDER BY username ASC")
+        cur.execute(
+            "SELECT id, username, role, created_at FROM users ORDER BY username ASC"
+        )
         return cur.fetchall()
+
+
+def update_user_role(user_id: int, new_role: str):
+    """Update the role for a user."""
+    if new_role not in ("user", "admin"):
+        raise ValueError("Invalid role")
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute(
+            "UPDATE users SET role = ? WHERE id = ?",
+            (new_role, user_id),
+        )
+        con.commit()
+
+
+def delete_user(user_id: int):
+    """Delete a user. Tickets with this user_id will have user_id set to NULL (per FK)."""
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        con.commit()
 
 
 # =========================================================
