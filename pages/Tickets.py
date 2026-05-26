@@ -70,11 +70,10 @@ if not st.session_state.show_form:
         f_status = st.multiselect(
             "Status",
             STATUS_CHOICES,
-            default=["New", "Open", "In Progress"],
         )
         f_ticket_type = st.selectbox(
             "Ticket type",
-            ["Bug", "Test Case"]
+            TICKET_TYPES,
         )
         f_search = st.text_input("Search", placeholder="subject, summary, expected outcome…")
         st.divider()
@@ -94,10 +93,10 @@ if not st.session_state.show_form:
     st.title("📋 Tickets")
 
     rows = list_tickets(
-    ticket_types=f_ticket_type,
-    statuses=f_status,
-    search=f_search
-)
+        ticket_types=[f_ticket_type],
+        statuses=f_status,
+        search=f_search
+    )
     if not rows:
         st.info("No tickets match your filters.")
     else:
