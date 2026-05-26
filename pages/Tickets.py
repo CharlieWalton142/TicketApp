@@ -72,6 +72,10 @@ if not st.session_state.show_form:
             STATUS_CHOICES,
             default=["New", "Open", "In Progress"],
         )
+        f_ticket_type = st.selectbox(
+            "Ticket type",
+            ["Bug", "Test Case"]
+        )
         f_search = st.text_input("Search", placeholder="subject, summary, expected outcome…")
         st.divider()
         if st.button("➕ New Ticket", use_container_width=True):
@@ -89,7 +93,7 @@ else:
 if not st.session_state.show_form:
     st.title("📋 Tickets")
 
-    rows = list_tickets(statuses=f_status, search=f_search)
+    rows = list_tickets(ticket_types=[f_ticket_type], statuses=f_status, search=f_search)
     if not rows:
         st.info("No tickets match your filters.")
     else:

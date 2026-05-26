@@ -175,7 +175,7 @@ def create_ticket(
         return cur.lastrowid
 
 
-def list_tickets(statuses=None, search: str = ""):
+def list_tickets(ticket_types=None, statuses=None, search: str = ""):
     """
     Return ticket rows, optionally filtered by statuses and search term.
 
@@ -196,6 +196,9 @@ def list_tickets(statuses=None, search: str = ""):
         WHERE 1=1
     """
     params: list = []
+    if ticket_types:
+        q += f" AND t.ticket_type IN ({','.join('?' * len(ticket_types))})"
+        params += list(ticket_types)
 
     if statuses:
         q += f" AND t.status IN ({','.join('?' * len(statuses))})"

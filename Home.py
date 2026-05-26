@@ -170,29 +170,39 @@ if admin:
         # 4️⃣ Unassigned tickets
         with row2_col2:
             with st.container(border=True):
-                st.markdown("#### Unassigned tickets")
-                if not unassigned_tickets:
-                    st.info("All tickets are assigned. ✅")
-                else:
-                    for t in unassigned_tickets[:10]:
-                        tid = t["ticket_id"]
-                        subject = t["subject"]
-                        status = t["status"]
-                        created_at = t["created_at"]
-                        ticket_type = t["ticket_type"]
+                st.markdown("#### Unassigned Bugs")
 
-                        st.markdown(
-                            f"**[{ticket_type}] #{tid} — {subject}**  \n"
-                            f"*Status:* `{status}` • *Created:* {created_at} • "
-                            f"*Created by:* {t['created_by'] or '—'}"
-                        )
-                        if st.button("View", key=f"home_view_unassigned_{tid}"):
-                            st.session_state.view_ticket_id = tid
-                            st.switch_page("pages/View_Ticket.py")
-                        st.markdown(
-                            "<hr style='margin: 0.4rem 0;'>",
-                            unsafe_allow_html=True,
-                        )
+                unassigned_bugs = [
+                    t for t in unassigned_tickets
+                    if t["ticket_type"] != "Test Case"
+                ]
+
+                if not unassigned_bugs:
+                    st.info("All bugs are assigned. ✅")
+                else:
+                    # Fixed-height scrollable area
+                    with st.container(height=350):
+                        for t in unassigned_bugs:
+                            tid = t["ticket_id"]
+                            subject = t["subject"]
+                            status = t["status"]
+                            created_at = t["created_at"]
+                            ticket_type = t["ticket_type"]
+
+                            st.markdown(
+                                f"**[{ticket_type}] #{tid} — {subject}**  \n"
+                                f"*Status:* `{status}` • *Created:* {created_at} • "
+                                f"*Created by:* {t['created_by'] or '—'}"
+                            )
+
+                            if st.button("View", key=f"home_view_unassigned_{tid}"):
+                                st.session_state.view_ticket_id = tid
+                                st.switch_page("pages/View_Ticket.py")
+
+                            st.markdown(
+                                "<hr style='margin: 0.4rem 0;'>",
+                                unsafe_allow_html=True,
+                            )
 else:
         # ---- Status breakdown + assigned-to-me (each boxed) ----
     left, right = st.columns([1, 1.2])
