@@ -93,7 +93,11 @@ else:
 if not st.session_state.show_form:
     st.title("📋 Tickets")
 
-    rows = list_tickets(ticket_types=[f_ticket_type], statuses=f_status, search=f_search)
+    rows = list_tickets(
+    ticket_types=f_ticket_type,
+    statuses=f_status,
+    search=f_search
+)
     if not rows:
         st.info("No tickets match your filters.")
     else:
