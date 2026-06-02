@@ -73,7 +73,8 @@ if not st.session_state.show_form:
         )
         f_ticket_type = st.selectbox(
             "Ticket type",
-            TICKET_TYPES,
+            ["Any"] + TICKET_TYPES,
+            index=0,
         )
         f_search = st.text_input("Search", placeholder="subject, summary, expected outcome…")
         st.divider()
@@ -93,7 +94,7 @@ if not st.session_state.show_form:
     st.title("📋 Tickets")
 
     rows = list_tickets(
-        ticket_types=[f_ticket_type],
+        ticket_types=None if f_ticket_type == "Any" else [f_ticket_type],
         statuses=f_status,
         search=f_search
     )
@@ -148,26 +149,32 @@ else:
     ticket_type = st.selectbox("Ticket type", TICKET_TYPES, index=0)
 
     # highlight only mandatory fields when empty (for Bug; still fine for Test Case)
-    st.markdown(
-        """
-        <style>
-        [data-testid="stTextInput"] input[aria-label="Subject"]:placeholder-shown,
-        [data-testid="stTextInput"] input[aria-label="Summary"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Prerequisites"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Steps to replicate"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Outcome"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Expected Outcome"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Preconditions / Requirements"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Test Steps"]:placeholder-shown,
-        [data-testid="stTextArea"] textarea[aria-label="Pass Criteria"]:placeholder-shown {
-            border: 2px solid #FFD700 !important;
-            border-radius: 8px !important;
-            background-color: rgba(255, 215, 0, 0.03) !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("""
+    <style>
+
+    /* RED = mandatory fields */
+    [data-testid="stTextInput"] input[aria-label="Subject"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Prerequisites"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Steps to replicate"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Outcome"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Expected Outcome"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Preconditions / Requirements"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Test Steps"]:placeholder-shown,
+    [data-testid="stTextArea"] textarea[aria-label="Pass Criteria"]:placeholder-shown {
+        border: 2px solid #ff4b4b !important;
+        border-radius: 8px !important;
+        background-color: rgba(255, 75, 75, 0.05) !important;
+    }
+
+    /* YELLOW = optional fields */
+    [data-testid="stTextInput"] input[aria-label="Summary"]:placeholder-shown {
+        border: 2px solid #FFD700 !important;
+        border-radius: 8px !important;
+        background-color: rgba(255, 215, 0, 0.03) !important;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 
     # Initialise variables so they're always defined
     subject = ""
@@ -254,7 +261,6 @@ else:
         else:  # Bug
             required_map = {
                 "Subject": subject,
-                "Summary": summary,
                 "Prerequisites": prerequisites,
                 "Steps to replicate": steps_to_replicate,
                 "Outcome": outcome,

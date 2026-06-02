@@ -12,6 +12,12 @@ from sidebar import (
 )
 
 from db import init_db, list_tickets
+# -------------------------------------------------
+# Auth gate
+# -------------------------------------------------
+require_login()
+hide_login_link_if_logged_in()
+hide_admin_page_for_non_admin()
 
 # -------------------------------------------------
 # Page + DB init
@@ -19,12 +25,6 @@ from db import init_db, list_tickets
 st.set_page_config(page_title="TicketApp - Home", page_icon="🎫", layout="wide")
 init_db()
 
-# -------------------------------------------------
-# Auth gate
-# -------------------------------------------------
-require_login()
-hide_login_link_if_logged_in()
-hide_admin_page_for_non_admin()
 
 user = get_current_user()
 username = user["username"]

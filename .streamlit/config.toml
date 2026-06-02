@@ -1,14 +1,9 @@
 [theme]
-base="dark"
-backgroundColor="#11254c"
-secondaryBackgroundColor="#1f202d"
+base = "dark"
 
+primaryColor = "#251db8ff"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#1B1F27"
+textColor = "#FDFDFD"
 
-# ---- Brand colors ----
-primaryColor = "#251db8ff"          # Indigo accent for buttons/sliders
-backgroundColor = "#0E1117"       # Deep gray background
-secondaryBackgroundColor = "#1B1F27"  # Card/sidebar background
-textColor = "#EDEDED"             # Soft white text
-
-# ---- Typography ----
-font = "sans serif"               # clean UI font
+font = "sans serif"

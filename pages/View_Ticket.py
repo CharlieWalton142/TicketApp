@@ -370,28 +370,28 @@ else:
         st.write(t["subject"] or "—")
 
         st.markdown("**Preconditions / Requirements**")
-        st.write(t["prerequisites"] or "—")
+        st.write((t["prerequisites"] or "—").replace("\n", "  \n"))
 
         st.markdown("**Test Steps**")
-        st.write(t["steps_to_replicate"] or "—")
+        st.write((t["steps_to_replicate"] or "—").replace("\n", "  \n"))
 
         st.markdown("**Pass Criteria**")
-        st.write(t["expected_outcome"] or "—")
+        st.write((t["expected_outcome"] or "—").replace("\n", "  \n"))
     else:  # Bug
         st.markdown("**Summary**")
         st.write(t["summary"] or "—")
 
         st.markdown("**Prerequisites**")
-        st.write(t["prerequisites"] or "—")
+        st.write((t["prerequisites"] or "—").replace("\n", "  \n"))
 
         st.markdown("**Steps to replicate**")
-        st.write(t["steps_to_replicate"] or "—")
+        st.write((t["steps_to_replicate"] or "—").replace("\n", "  \n"))
 
         st.markdown("**Outcome**")
-        st.write(t["outcome"] or "—")
+        st.write((t["outcome"] or "—").replace("\n", "  \n"))
 
         st.markdown("**Expected Outcome**")
-        st.write(t["expected_outcome"] or "—")
+        st.write((t["expected_outcome"] or "—").replace("\n", "  \n"))
 
     if t["parent_id"]:
         st.markdown(f"**Parent Ticket:** #{t['parent_id']}")
