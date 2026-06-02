@@ -1,4 +1,4 @@
-streamlit==1.32.0
-bcrypt==4.1.2
-pytest==8.0.2
-openai==26.1.2
+streamlit
+bcrypt
+pytest
+openai
