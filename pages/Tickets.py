@@ -184,7 +184,7 @@ else:
     outcome = ""
     expected_outcome = ""
 
-    with st.form("new_ticket", clear_on_submit=True):
+    with st.form("new_ticket", clear_on_submit=False):
 
         if ticket_type == "Test Case":
             # --- Test Case form (only the 4 required fields) ---
@@ -287,6 +287,7 @@ else:
                 status="New",
             )
 
-            st.success(f"{ticket_type} #{new_id} created successfully.")
+            st.session_state.view_ticket_id = new_id
             st.session_state.show_form = False
-            st.rerun()
+            st.success(f"{ticket_type} #{new_id} created successfully.")
+            st.switch_page("pages/View_Ticket.py")
