@@ -310,3 +310,80 @@ def init_db():
     init_user_db()
     init_ticket_db()
     print("✅ Database initialised successfully.")
+
+# =========================================================
+# AI integration
+# =========================================================
+
+def get_ticket_examples(ticket_type: str, limit: int = 100):
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute(
+            """
+            SELECT subject, summary, prerequisites, steps_to_replicate,
+                   outcome, expected_outcome
+            FROM tickets
+            WHERE ticket_type = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (ticket_type, limit),
+        )
+        return [dict(row) for row in cur.fetchall()]
+    
+
+# =========================================================
+# AI integration V2
+# =========================================================
+
+def get_ai_ticket_examples(subject: str, ticket_type: str, limit: int = 8):
+    """
+    Return similar tickets for AI generation.
+
+    For Bugs, include both Bug and Test Case examples because Test Cases
+    often contain better prerequisite and step detail.
+    """
+    words = [w.strip() for w in subject.split() if len(w.strip()) > 3]
+
+    if ticket_type == "Bug":
+        allowed_types = ["Bug", "Test Case"]
+    else:
+        allowed_types = ["Test Case"]
+
+    q = f"""
+        SELECT ticket_type, subject, summary, prerequisites,
+               steps_to_replicate, outcome, expected_outcome
+        FROM tickets
+        WHERE ticket_type IN ({','.join('?' * len(allowed_types))})
+    """
+
+    params = allowed_types
+
+    if words:
+        like_parts = []
+        for word in words[:6]:
+            like_parts.append("""
+                (
+                    subject LIKE ? OR
+                    summary LIKE ? OR
+                    prerequisites LIKE ? OR
+                    steps_to_replicate LIKE ? OR
+                    expected_outcome LIKE ?
+                )
+            """)
+            s = f"%{word}%"
+            params.extend([s, s, s, s, s])
+
+        q += " AND (" + " OR ".join(like_parts) + ")"
+
+    q += """
+        ORDER BY 
+            CASE WHEN ticket_type = ? THEN 0 ELSE 1 END,
+            created_at DESC
+        LIMIT ?
+    """
+
+    params.extend([ticket_type, limit])
+
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute(q, params)
+        return [dict(row) for row in cur.fetchall()]
