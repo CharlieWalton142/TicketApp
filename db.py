@@ -311,25 +311,6 @@ def init_db():
     init_ticket_db()
     print("✅ Database initialised successfully.")
 
-# =========================================================
-# AI integration
-# =========================================================
-
-def get_ticket_examples(ticket_type: str, limit: int = 100):
-    with _connect() as con, closing(con.cursor()) as cur:
-        cur.execute(
-            """
-            SELECT subject, summary, prerequisites, steps_to_replicate,
-                   outcome, expected_outcome
-            FROM tickets
-            WHERE ticket_type = ?
-            ORDER BY created_at DESC
-            LIMIT ?
-            """,
-            (ticket_type, limit),
-        )
-        return [dict(row) for row in cur.fetchall()]
-    
 
 # =========================================================
 # AI integration V2
@@ -390,7 +371,7 @@ def get_ai_ticket_examples(subject: str, ticket_type: str, limit: int = 8):
     
 
 # =========================================================
-# AI integration Entity V3
+# AI integration Entity Dependants
 # =========================================================
 
 def get_entity_examples(entity_terms, limit=10):

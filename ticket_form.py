@@ -3,7 +3,6 @@ import streamlit as st
 from db import (
     list_users,
     create_ticket,
-    get_ticket_examples,
 )
 
 from ai_helper import generate_ticket_from_subject
