@@ -387,3 +387,45 @@ def get_ai_ticket_examples(subject: str, ticket_type: str, limit: int = 8):
     with _connect() as con, closing(con.cursor()) as cur:
         cur.execute(q, params)
         return [dict(row) for row in cur.fetchall()]
+    
+
+# =========================================================
+# AI integration Entity V3
+# =========================================================
+
+def get_entity_examples(entity_terms, limit=10):
+    if not entity_terms:
+        return []
+
+    conditions = []
+    params = []
+
+    for term in entity_terms:
+        conditions.append("""
+            (
+                subject LIKE ?
+                OR summary LIKE ?
+                OR prerequisites LIKE ?
+                OR steps_to_replicate LIKE ?
+                OR outcome LIKE ?
+                OR expected_outcome LIKE ?
+            )
+        """)
+
+        s = f"%{term}%"
+        params.extend([s, s, s, s, s, s])
+
+    q = f"""
+        SELECT ticket_type, subject, summary, prerequisites,
+               steps_to_replicate, outcome, expected_outcome
+        FROM tickets
+        WHERE {" OR ".join(conditions)}
+        ORDER BY created_at DESC
+        LIMIT ?
+    """
+
+    params.append(limit)
+
+    with _connect() as con, closing(con.cursor()) as cur:
+        cur.execute(q, params)
+        return [dict(row) for row in cur.fetchall()]
