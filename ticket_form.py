@@ -271,7 +271,7 @@ def render_create_ticket_form(ticket_types):
         st.session_state.show_form = False
 
         clear_ai_fields()
-        st.session_state.create_subject = ""
+        st.session_state.pop("create_subject", None)
 
         st.success(f"{ticket_type} #{new_id} created successfully.")
         st.switch_page("pages/View_Ticket.py")
