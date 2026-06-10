@@ -16,6 +16,7 @@ DEPENDENCIES = {
     "invoices": ["candidates", "clients", "placements"],
     "placements": ["candidates", "clients"],
     "timesheets": ["placements"],
+    "vacancies": ["client"],
     "interviews": ["candidates"],
     "applications": ["candidates"],
     "projects": ["clients", "placements"],
