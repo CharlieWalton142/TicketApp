@@ -11,7 +11,7 @@ from db import (
 
 from sidebar import require_login, hide_login_link_if_logged_in, hide_admin_page_for_non_admin, get_current_user
 from ticket_form import render_create_ticket_form
-
+from ticket_form import render_create_ticket_form, clear_create_ticket_state
 
 # ---- Status options (for browsing/updating only) ----
 STATUS_CHOICES = [
@@ -86,6 +86,7 @@ if not st.session_state.show_form:
 else:
     with st.sidebar:
         if st.button("⬅ Back to Tickets", use_container_width=True):
+            clear_create_ticket_state()
             st.session_state.show_form = False
             st.rerun()
 

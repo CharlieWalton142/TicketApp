@@ -62,7 +62,7 @@ def clear_ai_fields():
 
 
 def render_subject_with_ai(ticket_type):
-    subject_col, generate_col = st.columns([5, 1])
+    subject_col, generate_col, clear_col = st.columns([5, 1, 1])
 
     with subject_col:
         st.text_input(
@@ -102,7 +102,20 @@ def render_subject_with_ai(ticket_type):
             st.session_state.ai_outcome = generated.get("outcome", "")
             st.session_state.ai_expected = generated.get("expected_outcome", "")
 
+            st.session_state.new_ticket_summary = st.session_state.ai_summary
+            st.session_state.new_ticket_prereq = st.session_state.ai_prereq
+            st.session_state.new_ticket_steps = st.session_state.ai_steps
+            st.session_state.new_ticket_outcome = st.session_state.ai_outcome
+            st.session_state.new_ticket_expected = st.session_state.ai_expected
+
             st.success("AI draft generated. You can edit it before saving.")
+            st.rerun()
+
+    with clear_col:
+        st.write("")
+        st.write("")
+        if st.button("🧹 Clear", use_container_width=True):
+            clear_create_ticket_state()
             st.rerun()
 
 
@@ -234,7 +247,22 @@ def save_ticket(ticket_type, values):
         parent_id=values["parent_id"],
         status="New",
     )
+def clear_create_ticket_state():
+    clear_ai_fields()
 
+    keys_to_clear = [
+        "create_subject",
+        "new_ticket_summary",
+        "new_ticket_prereq",
+        "new_ticket_steps",
+        "new_ticket_outcome",
+        "new_ticket_expected",
+        "new_ticket_parent",
+        "new_ticket_assigned_to",
+    ]
+
+    for key in keys_to_clear:
+        st.session_state.pop(key, None)
 
 def render_create_ticket_form(ticket_types):
     st.title("📝 Create New Ticket")
